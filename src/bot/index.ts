@@ -6,6 +6,12 @@ interface MyContext extends Context {
   wizard: Scenes.WizardContextWizard<MyContext>;
 }
 
+interface RegistrationState {
+  fullName: string;
+  whatsapp: string;
+  services: Set<string>;
+}
+
 // Dynamic variables loaded during setupBot
 let bot: Telegraf<MyContext> | null = null;
 let APPROVAL_CHANNEL_ID = "";
@@ -30,7 +36,8 @@ const registrationWizard = new Scenes.WizardScene<MyContext>(
       await ctx.reply("Invalid name. Please enter your full name (letters only):");
       return;
     }
-    (ctx.wizard.state as any).fullName = name;
+    const state = ctx.wizard.state as RegistrationState;
+    state.fullName = name;
     await ctx.reply("Enter your WhatsApp number (with country code, e.g. +91XXXXXXXXXX):");
     return ctx.wizard.next();
   },
@@ -41,8 +48,9 @@ const registrationWizard = new Scenes.WizardScene<MyContext>(
       await ctx.reply("Invalid format. Enter your WhatsApp number (e.g. +91XXXXXXXXXX):");
       return;
     }
-    (ctx.wizard.state as any).whatsapp = whatsapp;
-    (ctx.wizard.state as any).services = new Set<string>();
+    const state = ctx.wizard.state as RegistrationState;
+    state.whatsapp = whatsapp;
+    state.services = new Set<string>();
     
     await sendServiceSelection(ctx);
     return ctx.wizard.next();
@@ -50,7 +58,7 @@ const registrationWizard = new Scenes.WizardScene<MyContext>(
   async (ctx) => {
     if (ctx.callbackQuery && 'data' in ctx.callbackQuery) {
       const data = ctx.callbackQuery.data;
-      const state = ctx.wizard.state as any;
+      const state = ctx.wizard.state as RegistrationState;
       if (data.startsWith('toggle_')) {
         const service = data.replace('toggle_', '');
         if (state.services.has(service)) state.services.delete(service);
@@ -82,8 +90,9 @@ const registrationWizard = new Scenes.WizardScene<MyContext>(
         await ctx.answerCbQuery();
         await ctx.scene.reenter();
       } else if (data === 'submit_request') {
-        const state = ctx.wizard.state as any;
-        const tgId = ctx.from?.id!;
+        const state = ctx.wizard.state as RegistrationState;
+        const tgId = ctx.from?.id;
+        if (!tgId) return;
         const username = ctx.from?.username || null;
         
         try {
@@ -136,13 +145,15 @@ const registrationWizard = new Scenes.WizardScene<MyContext>(
 
 const serviceList = ["Amazon OTP", "SonyLiv OTP", "Hotstar OTP", "Netflix OTP", "JioCinema OTP", "All OTPs"];
 
-async function sendServiceSelection(ctx: any) {
-  const keyboard = getServiceSelectionKeyboard((ctx.wizard.state as any).services);
+async function sendServiceSelection(ctx: MyContext) {
+  const state = ctx.wizard.state as RegistrationState;
+  const keyboard = getServiceSelectionKeyboard(state.services);
   await ctx.reply("Select the OTP services you need:\n(Click to toggle, then click Done)", keyboard);
 }
 
-async function updateServiceSelection(ctx: any) {
-  const keyboard = getServiceSelectionKeyboard((ctx.wizard.state as any).services);
+async function updateServiceSelection(ctx: MyContext) {
+  const state = ctx.wizard.state as RegistrationState;
+  const keyboard = getServiceSelectionKeyboard(state.services);
   await ctx.editMessageText("Select the OTP services you need:\n(Click to toggle, then click Done)", keyboard);
 }
 
@@ -206,7 +217,8 @@ function initBotComands() {
   });
 
   bot.action('admin_pending', async (ctx) => {
-    if (!(await isAdmin(ctx.from?.id!))) return ctx.answerCbQuery("Not authorized", { show_alert: true });
+    if (!ctx.from?.id) return;
+    if (!(await isAdmin(ctx.from.id))) return ctx.answerCbQuery("Not authorized", { show_alert: true });
     
     try {
       const { rows } = await db.query("SELECT * FROM users WHERE status = 'pending'");
@@ -234,7 +246,8 @@ function initBotComands() {
   });
 
   bot.action(/approve_init_(\d+)/, async (ctx) => {
-    if (!(await isAdmin(ctx.from?.id!))) return ctx.answerCbQuery("Not authorized", { show_alert: true });
+    if (!ctx.from?.id) return;
+    if (!(await isAdmin(ctx.from.id))) return ctx.answerCbQuery("Not authorized", { show_alert: true });
     const targetId = ctx.match[1];
     const { rows } = await db.query('SELECT * FROM users WHERE telegram_id = $1', [targetId]);
     const user = rows[0] as User;
@@ -249,7 +262,8 @@ function initBotComands() {
   });
 
   bot.action(/reject_(\d+)/, async (ctx) => {
-    if (!(await isAdmin(ctx.from?.id!))) return ctx.answerCbQuery("Not authorized");
+    if (!ctx.from?.id) return;
+    if (!(await isAdmin(ctx.from.id))) return ctx.answerCbQuery("Not authorized");
     const targetId = ctx.match[1];
     await db.query('UPDATE users SET status = $1 WHERE telegram_id = $2', ['rejected', targetId]);
     try {
