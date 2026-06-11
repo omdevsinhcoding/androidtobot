@@ -18,11 +18,15 @@ export const OTPCard: React.FC<OTPCardProps> = ({ sms }) => {
   // Use receivedAt or receivedStamp for time
   const timestamp = receivedAt || (receivedStamp ? new Date(receivedStamp).toLocaleString() : '');
 
-  // Extract common OTP patterns (4-8 digits)
-  const otpMatch = text.match(/\b\d{4,8}\b/);
+  // Extract common OTP patterns (4-8 digits) safely
+  const textStr = text || '';
+  const fromStr = from || 'Unknown';
+  
+  const otpMatch = textStr.match(/\b\d{4,8}\b/);
   const otpObject = otpMatch ? otpMatch[0] : null;
 
   const tryFormatTime = (ts: string) => {
+    if (!ts) return '';
     try {
       const d = new Date(ts);
       if (isNaN(d.getTime())) return ts;
@@ -42,7 +46,7 @@ export const OTPCard: React.FC<OTPCardProps> = ({ sms }) => {
     return { text: 'text-indigo-400', accent: 'bg-indigo-500' };
   };
 
-  const palette = getBrandPalette(from);
+  const palette = getBrandPalette(fromStr);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
