@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
+import { initDb } from "./src/db/index.js";
 import { setupBot } from "./src/bot/index.js";
 import { apiRouter } from "./src/api/index.js";
 
@@ -14,11 +15,12 @@ async function startServer() {
 
   app.use(express.json());
 
-  // Setup Bot
+  // Setup DB then Bot
   try {
+    await initDb();
     await setupBot();
   } catch (err) {
-    console.error("Failed to setup bot during startup. Waiting for configuration via UI/Env:", err);
+    console.error("Failed to setup database or bot during startup:", err);
   }
 
   // API routes
