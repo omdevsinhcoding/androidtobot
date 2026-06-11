@@ -12,8 +12,8 @@ export const HomeTab: React.FC = () => {
   const { data: messages = [], isLoading, refetch } = useQuery({
     queryKey: ['sms', 'recent'],
     queryFn: async () => {
-      const res = await axios.get('/api/sms/recent');
-      return res.data;
+      const res = await axios.get('/api/sms');
+      return Array.isArray(res.data) ? res.data : [];
     },
     refetchInterval: 5000,
   });

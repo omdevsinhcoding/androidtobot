@@ -43,7 +43,7 @@ export default function App() {
     }
   }, []);
 
-  const { data: userData, isLoading: userLoading } = useQuery({
+  const { data: userData, isLoading: userLoading, isError } = useQuery({
     queryKey: ['user', tgUser?.id],
     queryFn: async () => {
       const res = await axios.get('/api/user/me');
@@ -67,6 +67,18 @@ export default function App() {
       <div className="flex flex-col items-center justify-center h-full gap-4 app-content-scroll">
         <Loader2 className="animate-spin text-[var(--tg-theme-button-color)]" size={32} />
         <p className="text-white/40 font-medium tracking-wide">Authenticating...</p>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full p-8 text-center bg-[#0a0a0a] app-content-scroll">
+        <ShieldAlert size={64} className="text-red-500 mb-6" />
+        <h2 className="text-2xl font-black text-white mb-3">Access Denied</h2>
+        <p className="text-white/60 leading-relaxed max-w-xs">
+          Your account does not have access to the secure OTP vault. Please register through the Telegram bot first.
+        </p>
       </div>
     );
   }
