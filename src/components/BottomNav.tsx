@@ -19,7 +19,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, i
   }
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 glass-panel border-t border-white/10 z-50">
+    <nav className="fixed bottom-0 left-0 right-0 glass-panel border-t border-white/5 z-50 bg-black/80">
       {/* Container respects safe area insets */}
       <div 
         className="flex items-center justify-around px-2"
@@ -33,21 +33,21 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, i
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className="tap-target flex-1 flex flex-col items-center justify-center gap-1 py-3 group outline-none"
+              className="tap-target flex-1 flex flex-col items-center justify-center gap-1.5 py-3 group outline-none"
               aria-label={tab.label}
               aria-pressed={isActive}
             >
-              <div className={`relative transition-all duration-300 ${isActive ? 'scale-110' : 'scale-100 group-hover:scale-105 group-active:scale-95'}`}>
+              <div className="relative flex items-center justify-center w-8 h-8">
+                {isActive && (
+                  <div className="absolute inset-0 bg-[var(--tg-theme-button-color)] opacity-20 rounded-full scale-125 transition-transform duration-300" />
+                )}
                 <Icon 
-                  size={24} 
-                  className={isActive ? 'text-[var(--tg-theme-button-color)]' : 'text-white/40'} 
+                  size={22} 
+                  className={`transition-all duration-300 ${isActive ? 'text-[var(--tg-theme-button-color)] scale-110' : 'text-white/40 scale-100 group-hover:text-white/70'}`} 
                   strokeWidth={isActive ? 2.5 : 2}
                 />
-                {isActive && (
-                  <div className="absolute inset-0 blur-md bg-[var(--tg-theme-button-color)] opacity-40 rounded-full" />
-                )}
               </div>
-              <span className={`text-[10px] font-medium tracking-wide transition-colors ${isActive ? 'text-[var(--tg-theme-button-color)]' : 'text-white/40'}`}>
+              <span className={`text-[10px] font-bold tracking-wide transition-colors ${isActive ? 'text-[var(--tg-theme-button-color)]' : 'text-white/40 group-hover:text-white/70'}`}>
                 {tab.label}
               </span>
             </button>

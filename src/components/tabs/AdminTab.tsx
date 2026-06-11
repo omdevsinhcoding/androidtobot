@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
-import { Loader2, UserCheck, UserX, Users } from 'lucide-react';
+import { Loader2, UserCheck, UserX, Users, UserCog } from 'lucide-react';
 
 export interface UserType {
   id: number;
@@ -42,19 +42,33 @@ export const AdminTab: React.FC = () => {
   const displayUsers = activeSegment === 'pending' ? pendingUsers : activeUsers;
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col min-h-full">
+      {/* Header Area */}
+      <div className="flex items-center justify-between mb-6 sticky top-0 bg-[#000000]/90 backdrop-blur-md z-40 py-2 -mx-4 px-4">
         <h2 className="text-xl font-black text-white tracking-tight">Admin</h2>
-        <div className="bg-white/10 rounded-full flex p-1">
+        
+        {/* Segmented Control */}
+        <div className="bg-white/10 rounded-xl flex p-1 border border-white/5">
           <button 
             onClick={() => setActiveSegment('pending')}
-            className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors ${activeSegment === 'pending' ? 'bg-[var(--tg-theme-button-color)] text-white' : 'text-white/40'}`}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              activeSegment === 'pending' 
+                ? 'bg-[var(--tg-theme-button-color)] text-white shadow-sm' 
+                : 'text-white/40 hover:text-white/80'
+            }`}
           >
             Pending
+            {pendingUsers.length > 0 && (
+              <span className="ml-1.5 bg-white/20 px-1.5 py-0.5 rounded-md text-[10px]">{pendingUsers.length}</span>
+            )}
           </button>
           <button 
             onClick={() => setActiveSegment('active')}
-            className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors ${activeSegment === 'active' ? 'bg-[var(--tg-theme-button-color)] text-white' : 'text-white/40'}`}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              activeSegment === 'active' 
+                ? 'bg-white/10 text-white shadow-sm' 
+                : 'text-white/40 hover:text-white/80'
+            }`}
           >
             Active
           </button>
@@ -62,41 +76,51 @@ export const AdminTab: React.FC = () => {
       </div>
 
       {isLoading ? (
-        <div className="flex flex-col items-center justify-center py-20 gap-3">
-          <Loader2 className="animate-spin text-white/40" size={24} />
+        <div className="flex-1 flex flex-col items-center justify-center gap-3">
+          <Loader2 className="animate-spin text-[var(--tg-theme-button-color)]" size={32} />
         </div>
       ) : displayUsers.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 gap-4 opacity-50">
-          <Users size={32} className="text-white/40" />
-          <span className="text-sm font-medium text-white/40">No users found in this segment.</span>
+        <div className="flex-1 flex flex-col items-center justify-center gap-4 opacity-50">
+          <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center border border-white/10">
+            <Users size={32} className="text-white/20" />
+          </div>
+          <span className="text-sm font-bold text-white/40">No users found.</span>
         </div>
       ) : (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-4 pb-4">
           {displayUsers.map(user => (
-            <div key={user.telegram_id} className="glass-panel p-4 rounded-2xl flex flex-col gap-3">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="text-sm font-bold text-white">{user.full_name}</h3>
-                  <p className="text-xs text-white/40 font-mono">{user.whatsapp}</p>
+            <div key={user.telegram_id} className="card-panel p-4 rounded-3xl flex flex-col gap-4 relative overflow-hidden">
+              <div className="flex justify-between items-start z-10">
+                <div className="flex gap-3 items-center">
+                  <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/5">
+                    <UserCog size={18} className="text-white/60" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-white">{user.full_name}</h3>
+                    <p className="text-xs text-white/40 font-mono mt-0.5">{user.whatsapp}</p>
+                  </div>
                 </div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--tg-theme-button-color)]">
+                <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-md ${
+                  user.status === 'pending' ? 'bg-orange-500/10 text-orange-400' : 'bg-green-500/10 text-green-400'
+                }`}>
                   {user.status}
                 </span>
               </div>
               
               {user.status === 'pending' && (
-                <div className="flex gap-2 mt-2">
+                <div className="flex gap-2 mt-2 z-10">
                   <button 
                     onClick={() => mutation.mutate({ telegramId: user.telegram_id, status: 'approved' })}
                     disabled={mutation.isPending}
-                    className="tap-target flex-1 flex items-center justify-center gap-2 bg-green-500/20 text-green-400 border border-green-500/30 rounded-xl font-bold text-sm active:scale-95 transition-transform"
+                    className="tap-target flex-1 flex items-center justify-center gap-2 bg-[var(--tg-theme-button-color)] hover:bg-[var(--tg-theme-button-color)]/80 text-white rounded-xl font-bold text-sm transition-all"
                   >
-                    <UserCheck size={16} /> Approve
+                    {mutation.isPending ? <Loader2 size={16} className="animate-spin" /> : <UserCheck size={16} />}
+                    Approve
                   </button>
                   <button 
                     onClick={() => mutation.mutate({ telegramId: user.telegram_id, status: 'rejected' })}
                     disabled={mutation.isPending}
-                    className="tap-target flex-1 flex items-center justify-center gap-2 bg-red-500/20 text-red-400 border border-red-500/30 rounded-xl font-bold text-sm active:scale-95 transition-transform"
+                    className="tap-target flex-1 flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-xl font-bold text-sm transition-all"
                   >
                     <UserX size={16} /> Reject
                   </button>

@@ -29,10 +29,13 @@ export default function App() {
     // 2. Set Header Color to match dark theme
     WebApp.setHeaderColor('#0a0a0a');
     WebApp.setBackgroundColor('#000000');
+    
+    // Lock scrolling on iOS inside Telegram Mini App
+    WebApp.ready();
 
     // 3. Initialize user
-    const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const user = WebApp.initDataUnsafe?.user || (isDev ? mockTgUser : null);
+    // @ts-ignore
+    const user = WebApp.initDataUnsafe?.user || (import.meta.env?.DEV ? mockTgUser : null);
     setTgUser(user);
 
     if (user) {
@@ -51,7 +54,7 @@ export default function App() {
 
   if (!tgUser) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen p-6 text-center">
+      <div className="flex flex-col items-center justify-center h-full p-6 text-center app-content-scroll">
         <ShieldAlert size={48} className="text-red-500 mb-4" />
         <h2 className="text-xl font-bold mb-2">Access Denied</h2>
         <p className="text-white/40">Please open this app directly from Telegram.</p>
@@ -61,9 +64,9 @@ export default function App() {
 
   if (userLoading) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen gap-4">
+      <div className="flex flex-col items-center justify-center h-full gap-4 app-content-scroll">
         <Loader2 className="animate-spin text-[var(--tg-theme-button-color)]" size={32} />
-        <p className="text-white/40 font-medium">Authenticating...</p>
+        <p className="text-white/40 font-medium tracking-wide">Authenticating...</p>
       </div>
     );
   }
@@ -74,7 +77,7 @@ export default function App() {
 
   if (isPending || isRejected || isBanned) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen p-8 text-center bg-[#0a0a0a]">
+      <div className="flex flex-col items-center justify-center h-full p-8 text-center bg-[#0a0a0a] app-content-scroll">
         <ShieldAlert size={64} className="text-[var(--tg-theme-button-color)] mb-6" />
         <h2 className="text-2xl font-black text-white mb-3">
           {isPending ? 'Request Pending' : isRejected ? 'Access Denied' : 'Account Banned'}
@@ -100,7 +103,7 @@ export default function App() {
 
   return (
     <>
-      <main className="app-content-scroll">
+      <main className="app-content-scroll bg-[#000000]">
         {renderTab()}
       </main>
       

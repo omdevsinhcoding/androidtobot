@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Copy, Check, ShieldCheck } from 'lucide-react';
+import { Copy, Check, ShieldCheck, Clock } from 'lucide-react';
 
 interface OTPCardProps {
   sms: {
@@ -8,9 +8,10 @@ interface OTPCardProps {
     receivedAt?: string;
     receivedStamp?: number;
   };
+  highlight?: boolean;
 }
 
-export const OTPCard: React.FC<OTPCardProps> = ({ sms }) => {
+export const OTPCard: React.FC<OTPCardProps> = ({ sms, highlight = false }) => {
   const [copied, setCopied] = useState(false);
   const { from, text, receivedAt, receivedStamp } = sms;
   
@@ -27,7 +28,14 @@ export const OTPCard: React.FC<OTPCardProps> = ({ sms }) => {
     try {
       const d = new Date(ts);
       if (isNaN(d.getTime())) return ts;
-      return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+      
+      const now = new Date();
+      const diffDays = Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
+      
+      const timeStr = d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+      if (diffDays === 0) return timeStr;
+      if (diffDays === 1) return `Yesterday ${timeStr}`;
+      return `${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} ${timeStr}`;
     } catch {
       return ts;
     }
@@ -35,12 +43,14 @@ export const OTPCard: React.FC<OTPCardProps> = ({ sms }) => {
 
   const getBrandPalette = (sender: string) => {
     const s = sender.toUpperCase();
-    if (s.includes('AMAZON')) return 'text-orange-400 bg-orange-500/10 border-orange-500/20';
-    if (s.includes('SONY')) return 'text-blue-400 bg-blue-500/10 border-blue-500/20';
-    if (s.includes('HOTSTAR')) return 'text-purple-400 bg-purple-500/10 border-purple-500/20';
-    if (s.includes('NETFLIX')) return 'text-red-400 bg-red-500/10 border-red-500/20';
-    if (s.includes('GOOGLE')) return 'text-blue-300 bg-blue-400/10 border-blue-400/20';
-    return 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20';
+    if (s.includes('AMAZON')) return { icon: 'text-orange-400', bg: 'bg-orange-500/10' };
+    if (s.includes('SONY')) return { icon: 'text-blue-400', bg: 'bg-blue-500/10' };
+    if (s.includes('HOTSTAR')) return { icon: 'text-purple-400', bg: 'bg-purple-500/10' };
+    if (s.includes('NETFLIX')) return { icon: 'text-red-400', bg: 'bg-red-500/10' };
+    if (s.includes('GOOGLE')) return { icon: 'text-blue-300', bg: 'bg-blue-400/10' };
+    if (s.includes('WHATSAPP')) return { icon: 'text-green-400', bg: 'bg-green-500/10' };
+    if (s.includes('TELEGRAM')) return { icon: 'text-sky-400', bg: 'bg-sky-500/10' };
+    return { icon: 'text-indigo-400', bg: 'bg-indigo-500/10' };
   };
 
   const palette = getBrandPalette(fromStr);
@@ -54,40 +64,60 @@ export const OTPCard: React.FC<OTPCardProps> = ({ sms }) => {
     }
   };
 
+  // The latest highlight card will look slightly different (larger, stronger border)
+  const baseClasses = highlight 
+    ? "glass-panel p-4 rounded-3xl border-[var(--tg-theme-button-color)]/30 border-2" 
+    : "card-panel p-3.5 rounded-2xl";
+
   return (
-    <div className="glass-panel p-3 rounded-2xl flex items-center justify-between gap-3 relative overflow-hidden group">
-      <div className="flex items-center gap-3 min-w-0">
-        <div className={`shrink-0 w-10 h-10 rounded-xl flex items-center justify-center border ${palette}`}>
-          <ShieldCheck size={18} strokeWidth={2.5} />
+    <div className={`${baseClasses} flex flex-col gap-3 relative overflow-hidden`}>
+      {highlight && (
+        <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+          <ShieldCheck size={120} />
         </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <h3 className="text-sm font-bold text-white truncate">{from}</h3>
-            <span className="shrink-0 text-[10px] font-medium text-white/40">{tryFormatTime(timestamp)}</span>
+      )}
+      
+      <div className="flex items-start justify-between gap-3 relative z-10">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className={`shrink-0 ${highlight ? 'w-12 h-12 rounded-2xl' : 'w-10 h-10 rounded-xl'} flex items-center justify-center ${palette.bg}`}>
+            <ShieldCheck size={highlight ? 24 : 18} className={palette.icon} strokeWidth={2.5} />
           </div>
-          <p className="text-xs text-white/60 truncate mt-0.5">{text}</p>
+          <div className="min-w-0 flex-1">
+            <h3 className={`${highlight ? 'text-lg' : 'text-sm'} font-black text-white truncate`}>{from}</h3>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <Clock size={12} className="text-white/30" />
+              <span className="text-xs font-medium text-white/40 truncate">{tryFormatTime(timestamp)}</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      {otpObject && (
-        <button 
-          onClick={handleCopy}
-          className="shrink-0 tap-target flex items-center justify-center bg-white/5 hover:bg-white/10 active:bg-white/20 border border-white/10 rounded-xl transition-colors ml-2"
-          aria-label="Copy OTP"
-        >
-          {copied ? (
-            <div className="flex items-center gap-1.5 px-3 text-green-400">
-              <Check size={16} strokeWidth={3} />
-              <span className="text-sm font-bold font-mono">{otpObject}</span>
-            </div>
-          ) : (
-            <div className="flex items-center gap-1.5 px-3 text-white">
-              <Copy size={14} className="text-white/40" />
-              <span className="text-sm font-bold font-mono tracking-wider">{otpObject}</span>
-            </div>
-          )}
-        </button>
-      )}
+      <div className="relative z-10 pl-[3.25rem]">
+        <p className={`${highlight ? 'text-sm' : 'text-xs'} text-white/70 leading-relaxed mb-3`}>{text}</p>
+        
+        {otpObject && (
+          <button 
+            onClick={handleCopy}
+            className="tap-target h-12 w-full flex items-center justify-between bg-white/5 hover:bg-white/10 active:bg-white/20 border border-white/10 rounded-xl px-4 transition-all"
+            aria-label="Copy OTP"
+          >
+            <span className={`font-mono font-black tracking-[0.2em] ${highlight ? 'text-2xl text-[var(--tg-theme-button-color)]' : 'text-xl text-white'}`}>
+              {otpObject}
+            </span>
+            {copied ? (
+              <div className="flex items-center gap-1.5 text-green-400 bg-green-400/10 px-2 py-1 rounded-md">
+                <Check size={16} strokeWidth={3} />
+                <span className="text-xs font-bold uppercase tracking-wider">Copied</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5 text-white/40">
+                <Copy size={16} />
+                <span className="text-xs font-bold uppercase tracking-wider">Copy</span>
+              </div>
+            )}
+          </button>
+        )}
+      </div>
     </div>
   );
 };
