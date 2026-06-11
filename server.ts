@@ -40,8 +40,7 @@ async function startServer() {
     if (typeof __dirname !== 'undefined') {
       currentDir = __dirname;
     } else {
-      const { fileURLToPath } = await import('url');
-      currentDir = path.dirname(fileURLToPath((import.meta as any).url));
+      currentDir = process.cwd();
     }
     
     // In compiled dist/server.cjs, the script is inside dist/
