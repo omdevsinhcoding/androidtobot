@@ -35,10 +35,19 @@ async function startServer() {
     });
     app.use(vite.middlewares);
   } else {
-    // ES Module compatible dirname
-    const { fileURLToPath } = await import('url');
-    const __dirname = path.dirname(fileURLToPath(import.meta.url));
-    const distPath = path.join(__dirname, 'dist');
+    // Safely determine current directory across both ESM and CommonJS
+    let currentDir: string;
+    if (typeof __dirname !== 'undefined') {
+      currentDir = __dirname;
+    } else {
+      const { fileURLToPath } = await import('url');
+      currentDir = path.dirname(fileURLToPath((import.meta as any).url));
+    }
+    
+    // In compiled dist/server.cjs, the script is inside dist/
+    // If we're inside dist, we don't need to append 'dist'
+    const distPath = currentDir.endsWith('dist') ? currentDir : path.join(currentDir, 'dist');
+    
     app.use(express.static(distPath));
     app.get('*', (req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
