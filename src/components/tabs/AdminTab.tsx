@@ -20,14 +20,14 @@ export const AdminTab: React.FC = () => {
     queryKey: ['admin', 'users'],
     queryFn: async () => {
       const res = await axios.get('/api/admin/users');
-      return res.data;
+      return Array.isArray(res.data) ? res.data : [];
     },
     refetchInterval: 5000,
   });
 
   const updateStatus = useMutation({
     mutationFn: async ({ tgId, status }: { tgId: string; status: string }) => {
-      await axios.post('/api/admin/users/status', { tgId, status });
+      await axios.post(`/api/admin/users/${tgId}/status`, { status });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
@@ -36,7 +36,7 @@ export const AdminTab: React.FC = () => {
 
   const updateServices = useMutation({
     mutationFn: async ({ tgId, activeServices }: { tgId: string; activeServices: number }) => {
-      await axios.post('/api/admin/users/services', { tgId, activeServices });
+      await axios.post(`/api/admin/users/${tgId}/services`, { activeServices });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });

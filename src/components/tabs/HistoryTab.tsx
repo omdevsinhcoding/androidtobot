@@ -11,8 +11,8 @@ export const HistoryTab: React.FC = () => {
   const { data: messages = [], isLoading } = useQuery({
     queryKey: ['sms', 'history'],
     queryFn: async () => {
-      const res = await axios.get('/api/sms/history');
-      return res.data;
+      const res = await axios.get('/api/sms');
+      return Array.isArray(res.data) ? res.data : [];
     },
     refetchInterval: 10000,
   });

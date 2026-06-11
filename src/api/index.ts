@@ -87,6 +87,19 @@ apiRouter.post("/admin/users/:telegramId/status", async (req, res) => {
   }
 });
 
+apiRouter.post("/admin/users/:telegramId/services", async (req, res) => {
+  if (!req.isAdmin) return res.status(403).json({ error: "Admin only" });
+  try {
+    const { activeServices } = req.body;
+    const { telegramId } = req.params;
+    
+    await db.query("UPDATE users SET active_services = $1 WHERE telegram_id = $2", [activeServices, telegramId]);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error instanceof Error ? error.message : "Internal error" });
+  }
+});
+
 apiRouter.get("/sms/latest", async (req, res) => {
   try {
     const { rows } = await db.query("SELECT value FROM settings WHERE key = 'API_URL'");
