@@ -1,0 +1,6 @@
+{
+  "name": "Vault .01",
+  "description": "A premium, obsidian-themed secure signal monitoring system for private OTP verification.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

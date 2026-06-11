@@ -1,0 +1,110 @@
+@import "tailwindcss";
+
+:root {
+  --app-header-height: 56px;
+  --bottom-footer-height: 64px;
+}
+
+html, body {
+  font-size: 16px;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  overscroll-behavior-y: none;
+}
+
+body {
+  background-color: #000000;
+  color: #ffffff;
+  font-family: 'Satoshi', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  height: var(--tg-viewport-stable-height, 100dvh);
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.app-header {
+  flex-shrink: 0;
+  padding-top: calc(env(safe-area-inset-top, 16px) + var(--tg-safe-area-inset-top, 0px));
+  padding-bottom: 16px;
+  z-index: 50;
+  background-color: #000000;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.app-main {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding-bottom: calc(var(--bottom-footer-height) + env(safe-area-inset-bottom, 16px) + var(--tg-safe-area-inset-bottom, 0px));
+}
+
+.top-tabs-wrapper {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background-color: rgba(0, 0, 0, 0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 12px 16px;
+  margin: 0 -16px; 
+}
+
+.app-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding-bottom: calc(env(safe-area-inset-bottom, 16px) + var(--tg-safe-area-inset-bottom, 0px));
+  padding-top: 12px;
+  background: #0c0c0c;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 50;
+  height: var(--bottom-footer-height);
+}
+
+/* Glassmorphism utility */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.shadow-glass {
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+
+.hidden-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hidden-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
