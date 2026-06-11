@@ -35,68 +35,72 @@ export const OTPCard: React.FC<OTPCardProps> = ({ sms, highlight }) => {
       ? new Date(sms.receivedStamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       : 'Just now';
 
-  // Hero Card Mode (Latest OTP)
+  // Premium Holographic Black Card (Latest OTP)
   if (highlight) {
     return (
       <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="card-panel glow-border rounded-3xl p-6 relative overflow-hidden"
+        initial={{ opacity: 0, y: 30, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ type: "spring", stiffness: 200, damping: 20 }}
+        whileHover={{ scale: 1.02, rotateX: 2, rotateY: -2 }}
+        whileTap={{ scale: 0.98 }}
+        className="holographic-card rounded-[28px] p-7 relative cursor-default"
       >
-        {/* Abstract background glow */}
-        <div className="absolute -top-20 -right-20 w-40 h-40 bg-[var(--tg-theme-button-color)]/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-[80px] pointer-events-none" />
+        <div className="absolute bottom-[-20%] left-[-10%] w-40 h-40 bg-purple-500/20 rounded-full blur-[60px] pointer-events-none" />
         
-        <div className="flex items-center justify-between mb-4 relative z-10">
-          <div className="flex items-center gap-2 text-[var(--tg-theme-button-color)] font-semibold bg-[var(--tg-theme-button-color)]/10 px-3 py-1.5 rounded-full text-sm">
-            <ShieldCheck size={16} />
-            <span>Secure OTP</span>
+        <div className="flex items-center justify-between mb-8 relative z-10">
+          <div className="flex items-center gap-2 text-sky-400 font-bold bg-sky-400/10 border border-sky-400/20 px-3 py-1.5 rounded-full text-[10px] uppercase tracking-widest shadow-[0_0_15px_rgba(56,189,248,0.2)]">
+            <ShieldCheck size={14} />
+            <span>Secure Token</span>
           </div>
-          <div className="flex items-center gap-1.5 text-white/50 text-xs font-medium">
+          <div className="flex items-center gap-1.5 text-white/40 text-xs font-semibold tracking-wider uppercase">
             <Clock size={12} />
             {timeString}
           </div>
         </div>
 
-        <div className="mb-6 relative z-10">
-          <h2 className="text-white/70 text-sm mb-1 font-medium">{sms.from}</h2>
+        <div className="mb-8 relative z-10">
+          <h2 className="text-white/50 text-xs font-bold uppercase tracking-widest mb-2">{sms.from}</h2>
           {code ? (
-            <div className="flex flex-col items-start gap-4">
-              <div className="text-5xl font-black tracking-widest glow-text bg-clip-text text-transparent bg-gradient-to-r from-white to-white/70">
+            <div className="flex flex-col items-start gap-2">
+              <div className="text-6xl font-black tracking-[0.2em] glow-text text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.4)]" style={{ fontVariantNumeric: 'tabular-nums' }}>
                 {code}
               </div>
-              <p className="text-white/50 text-sm leading-relaxed">{sms.text}</p>
+              <p className="text-white/60 text-sm leading-relaxed mt-2 font-medium">{sms.text}</p>
             </div>
           ) : (
-            <p className="text-white/90 text-lg font-medium leading-relaxed">{sms.text}</p>
+            <p className="text-white/90 text-xl font-medium leading-relaxed tracking-wide">{sms.text}</p>
           )}
         </div>
 
         <button 
           onClick={() => handleCopy(code || sms.text)}
-          className="w-full relative z-10 overflow-hidden rounded-2xl bg-[var(--tg-theme-button-color)] text-[var(--tg-theme-button-text-color)] font-semibold py-4 flex items-center justify-center gap-2 active:scale-[0.98] transition-transform shadow-[0_0_20px_rgba(42,171,238,0.3)] hover:shadow-[0_0_30px_rgba(42,171,238,0.5)]"
+          className="w-full relative z-10 overflow-hidden rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 text-white font-bold py-4 flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-[0_10px_30px_-10px_rgba(14,165,233,0.6)] hover:shadow-[0_10px_40px_-5px_rgba(14,165,233,0.8)] border border-white/20"
         >
+          <div className="absolute inset-0 bg-white/20 opacity-0 hover:opacity-100 transition-opacity" />
           <AnimatePresence mode="wait">
             {copied ? (
               <motion.div
                 key="checked"
-                initial={{ opacity: 0, scale: 0.5 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.5 }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
                 className="flex items-center gap-2"
               >
-                <Check size={20} />
-                <span>Copied Securely</span>
+                <Check size={20} strokeWidth={3} />
+                <span>Copied to Clipboard</span>
               </motion.div>
             ) : (
               <motion.div
                 key="copy"
-                initial={{ opacity: 0, scale: 0.5 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.5 }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
                 className="flex items-center gap-2"
               >
-                <Copy size={20} />
-                <span>Copy to Clipboard</span>
+                <Copy size={20} strokeWidth={2.5} />
+                <span>Copy Secure Code</span>
               </motion.div>
             )}
           </AnimatePresence>

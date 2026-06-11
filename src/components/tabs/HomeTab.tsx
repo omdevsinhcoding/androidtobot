@@ -54,37 +54,49 @@ export const HomeTab: React.FC = () => {
 
       {/* Categories / Filters */}
       <div className="flex items-center gap-2 overflow-x-auto no-scrollbar px-2 mb-8 pb-1">
-        {(['all', 'otp', 'bank'] as const).map((f) => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`px-5 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap border ${
-              filter === f 
-                ? 'bg-[var(--tg-theme-button-color)] text-[var(--tg-theme-button-text-color)] border-transparent shadow-[0_4px_20px_rgba(42,171,238,0.4)]' 
-                : 'glass-panel text-white/60 hover:text-white/90 border-white/5'
-            }`}
-          >
-            {f.charAt(0).toUpperCase() + f.slice(1)}
-          </button>
-        ))}
+        {(['all', 'otp', 'bank'] as const).map((f) => {
+          const isActive = filter === f;
+          return (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`relative px-6 py-2.5 rounded-full text-sm font-bold transition-colors whitespace-nowrap ${
+                isActive ? 'text-white' : 'text-white/50 hover:text-white/80'
+              }`}
+            >
+              {isActive && (
+                <motion.div
+                  layoutId="filterPill"
+                  className="absolute inset-0 bg-gradient-to-r from-sky-500 to-blue-600 rounded-full border border-sky-400/30 shadow-[0_4px_20px_rgba(14,165,233,0.4)]"
+                  transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                />
+              )}
+              <span className="relative z-10">{f.charAt(0).toUpperCase() + f.slice(1)}</span>
+            </button>
+          );
+        })}
       </div>
 
       <div className="flex flex-col gap-4">
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-20 text-white/30 gap-4">
-            <Loader2 className="animate-spin" size={32} />
-            <p className="text-sm font-medium">Decrypting inbox...</p>
+          <div className="flex flex-col items-center justify-center py-20 text-white/40 gap-6">
+            <Loader2 className="animate-spin text-sky-400" size={40} />
+            <p className="text-sm font-semibold uppercase tracking-widest text-sky-400/60">Decrypting vault...</p>
           </div>
         ) : messages.length === 0 ? (
           <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="flex flex-col items-center justify-center py-20 text-white/30"
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            className="flex flex-col items-center justify-center py-24 text-center"
           >
-            <div className="w-20 h-20 rounded-full glass-panel flex items-center justify-center mb-4 border border-white/5">
-              <Inbox size={32} className="opacity-50" />
+            <div className="relative w-32 h-32 mb-8 flex items-center justify-center">
+              <div className="absolute inset-0 bg-sky-500/10 rounded-full blur-2xl" />
+              <div className="relative z-10 w-24 h-24 rounded-[32px] glass-panel border border-white/10 flex items-center justify-center shadow-[0_20px_40px_-10px_rgba(0,0,0,0.5)]">
+                <Inbox size={48} className="text-white/20" strokeWidth={1} />
+              </div>
             </div>
-            <p className="font-medium">Vault is empty</p>
+            <h3 className="text-xl font-bold text-white mb-2">Vault is Empty</h3>
+            <p className="text-white/40 text-sm max-w-[200px] leading-relaxed">Incoming secure messages will appear here instantly.</p>
           </motion.div>
         ) : (
           <AnimatePresence mode="popLayout">

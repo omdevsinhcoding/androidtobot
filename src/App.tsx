@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import WebApp from '@twa-dev/sdk';
 import { ShieldAlert, Loader2 } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 import { BottomNav } from './components/BottomNav';
 import { HomeTab } from './components/tabs/HomeTab';
@@ -115,19 +116,37 @@ export default function App() {
 
   return (
     <div className="mesh-bg text-white h-[100dvh] w-full flex flex-col font-sans antialiased overflow-hidden relative">
-      {/* Background ambient lighting effects */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-blue-500/10 blur-[100px] pointer-events-none" />
-      <div className="absolute bottom-[20%] right-[-10%] w-[40%] h-[40%] rounded-full bg-purple-500/10 blur-[100px] pointer-events-none" />
+      <div className="noise-overlay"></div>
+      
+      {/* Advanced Animated Background Shapes */}
+      <motion.div 
+        animate={{ 
+          scale: [1, 1.2, 1],
+          rotate: [0, 90, 0],
+          opacity: [0.3, 0.5, 0.3] 
+        }}
+        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+        className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-blue-500/20 blur-[120px] pointer-events-none" 
+      />
+      <motion.div 
+        animate={{ 
+          scale: [1, 1.5, 1],
+          x: [0, 50, 0],
+          opacity: [0.2, 0.4, 0.2] 
+        }}
+        transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute bottom-[20%] right-[-10%] w-[60vw] h-[60vw] rounded-full bg-purple-600/20 blur-[120px] pointer-events-none" 
+      />
 
       {/* Main scrolling content area */}
-      <main className="app-content-scroll z-10">
+      <main className="app-content-scroll z-10 relative">
         <div className="max-w-xl mx-auto">
           {renderTab()}
         </div>
       </main>
       
       {/* Floating Bottom Navigation */}
-      <div className="z-50 max-w-xl mx-auto w-full absolute bottom-0 left-1/2 -translate-x-1/2">
+      <div className="z-50 max-w-xl mx-auto w-full absolute bottom-6 left-1/2 -translate-x-1/2 px-4">
         <BottomNav 
           activeTab={activeTab} 
           setActiveTab={setActiveTab} 

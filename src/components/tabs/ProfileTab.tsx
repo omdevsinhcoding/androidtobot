@@ -1,7 +1,8 @@
 import React from 'react';
 import { User as UserType } from '../../../db';
-import { Settings, Shield, KeyRound, Copy, Check } from 'lucide-react';
+import { Settings, Shield, KeyRound, Copy, Check, Activity } from 'lucide-react';
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 
 interface ProfileTabProps {
   user: UserType | null;
@@ -26,34 +27,43 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ user, tgUser }) => {
     <div className="flex flex-col h-full w-full px-4 pb-10">
       
       {/* Premium Profile Header Card */}
-      <div className="card-panel glow-border rounded-3xl p-6 flex flex-col items-center justify-center relative overflow-hidden mb-8 mt-4 shadow-[0_20px_40px_rgba(0,0,0,0.4)]">
-        {/* Abstract background glow inside the card */}
-        <div className="absolute top-[-50%] right-[-20%] w-64 h-64 bg-blue-500/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-[-30%] left-[-20%] w-40 h-40 bg-purple-500/20 rounded-full blur-3xl pointer-events-none" />
+      <div className="glass-panel rounded-[32px] p-8 flex flex-col items-center justify-center relative overflow-hidden mb-8 mt-4 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.5)] border border-white/5">
+        {/* Abstract background glows */}
+        <div className="absolute top-[-50%] right-[-20%] w-64 h-64 bg-sky-500/20 rounded-full blur-[80px] pointer-events-none" />
+        <div className="absolute bottom-[-30%] left-[-20%] w-40 h-40 bg-purple-500/20 rounded-full blur-[60px] pointer-events-none" />
         
-        {/* Avatar Container with forced bounds to prevent native image overflow */}
-        <div className="relative z-10 mb-4 rounded-full p-1 bg-gradient-to-br from-white/20 to-white/5 backdrop-blur-md border border-white/10 shadow-2xl">
-          <div 
-            className="rounded-full overflow-hidden bg-[#1a1a1a]"
-            style={{ width: '80px', height: '80px', minWidth: '80px', minHeight: '80px' }}
-          >
-            <img 
-              src={profilePicUrl} 
-              alt="Profile" 
-              className="w-full h-full object-cover"
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            />
+        {/* Animated Radar Pulse Avatar */}
+        <div className="relative z-10 mb-6 flex items-center justify-center">
+          <motion.div
+            animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0, 0.5] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute inset-0 rounded-full border border-sky-400/30"
+          />
+          <motion.div
+            animate={{ scale: [1, 2, 1], opacity: [0.3, 0, 0.3] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+            className="absolute inset-0 rounded-full border border-sky-400/20"
+          />
+          
+          <div className="relative rounded-full p-1.5 bg-gradient-to-br from-white/20 to-transparent backdrop-blur-md border border-white/10 shadow-2xl">
+            <div className="rounded-full overflow-hidden bg-[#0a0a0a] w-[90px] h-[90px] relative z-20">
+              <img 
+                src={profilePicUrl} 
+                alt="Profile" 
+                className="w-full h-full object-cover"
+              />
+            </div>
+            {/* Online Indicator */}
+            <div className="absolute bottom-1 right-1 w-5 h-5 bg-green-400 border-[3px] border-[#0a0a0a] rounded-full shadow-[0_0_15px_rgba(74,222,128,0.6)] z-30" />
           </div>
-          {/* Online Indicator */}
-          <div className="absolute bottom-1 right-1 w-4 h-4 bg-green-500 border-2 border-[#0f172a] rounded-full shadow-[0_0_10px_rgba(34,197,94,0.5)]"></div>
         </div>
 
         <div className="text-center relative z-10">
-          <h2 className="text-2xl font-bold text-white mb-1 tracking-tight">
+          <h2 className="text-3xl font-black text-white mb-2 tracking-tight drop-shadow-lg">
             {tgUser?.first_name} {tgUser?.last_name}
           </h2>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-white/60 text-xs font-medium">
-            <Shield size={12} className="text-[var(--tg-theme-button-color)]" />
+          <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-sky-500/10 border border-sky-500/20 text-sky-400 text-xs font-bold uppercase tracking-widest shadow-[0_0_15px_rgba(14,165,233,0.15)]">
+            <Shield size={14} />
             <span>Secure Vault Protected</span>
           </div>
         </div>
