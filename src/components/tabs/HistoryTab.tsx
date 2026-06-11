@@ -3,76 +3,76 @@ import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { Loader2, Inbox, Search } from 'lucide-react';
 import { OTPCard } from '../OTPCard';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export const HistoryTab: React.FC = () => {
   const [search, setSearch] = useState('');
 
-  const { data: smsList, isLoading, isError } = useQuery({
-    queryKey: ['sms'],
+  const { data: messages = [], isLoading } = useQuery({
+    queryKey: ['sms', 'history'],
     queryFn: async () => {
-      const res = await axios.get('/api/sms');
-      return res.data || [];
+      const res = await axios.get('/api/sms/history');
+      return res.data;
     },
     refetchInterval: 10000,
   });
 
-  const filteredList = (smsList || []).filter((sms: any) => {
-    if (!search) return true;
-    const q = search.toLowerCase();
-    const fromMatch = sms.from?.toLowerCase().includes(q);
-    const textMatch = sms.text?.toLowerCase().includes(q);
-    return fromMatch || textMatch;
-  });
+  const filteredMessages = messages.filter((m: any) => 
+    m.from.toLowerCase().includes(search.toLowerCase()) || 
+    m.text.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
-    <div className="flex flex-col min-h-full">
-      {/* Header Area */}
-      <div className="flex flex-col gap-4 mb-6 sticky top-0 bg-[#000000]/90 backdrop-blur-md z-40 py-2 -mx-4 px-4">
-        <h2 className="text-xl font-black text-white tracking-tight">History</h2>
+    <div className="flex flex-col h-full w-full px-2 pb-10">
+      <div className="mb-6 px-2 pt-2">
+        <h1 className="text-2xl font-bold text-white mb-4">Message History</h1>
         
-        {/* Search Bar */}
-        <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search size={16} className="text-white/30" />
+        {/* Premium Search Bar */}
+        <div className="relative group">
+          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/40 group-focus-within:text-[var(--tg-theme-button-color)] transition-colors">
+            <Search size={18} />
           </div>
           <input
             type="text"
-            className="block w-full pl-10 pr-3 py-2.5 border border-white/10 rounded-xl leading-5 bg-white/5 text-white placeholder-white/30 focus:outline-none focus:bg-white/10 focus:border-[var(--tg-theme-button-color)] transition-colors text-sm"
             placeholder="Search by sender or text..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-11 pr-4 py-3.5 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-white/30 focus:outline-none focus:bg-white/10 focus:border-[var(--tg-theme-button-color)]/50 focus:ring-1 focus:ring-[var(--tg-theme-button-color)]/50 transition-all shadow-[0_4px_20px_rgba(0,0,0,0.2)]"
           />
         </div>
       </div>
 
-      {isLoading ? (
-        <div className="flex-1 flex flex-col items-center justify-center gap-3">
-          <Loader2 className="animate-spin text-white/20" size={32} />
-        </div>
-      ) : isError ? (
-        <div className="card-panel p-4 rounded-2xl text-center text-red-400 text-sm font-medium">
-          Failed to load history.
-        </div>
-      ) : !smsList || smsList.length === 0 ? (
-        <div className="flex-1 flex flex-col items-center justify-center gap-4 opacity-50">
-          <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center border border-white/10">
-            <Inbox size={32} className="text-white/20" />
+      <div className="flex flex-col gap-3">
+        {isLoading ? (
+          <div className="flex justify-center py-10">
+            <Loader2 className="animate-spin text-white/30" size={32} />
           </div>
-          <span className="text-sm font-medium text-white/40">History is empty.</span>
-        </div>
-      ) : (
-        <div className="flex flex-col gap-3 pb-4">
-          {filteredList.length === 0 ? (
-            <div className="text-center py-10 text-white/40 text-sm">
-              No matching OTPs found.
+        ) : filteredMessages.length === 0 ? (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex flex-col items-center justify-center py-20 text-white/30"
+          >
+            <div className="w-16 h-16 rounded-full glass-panel flex items-center justify-center mb-4">
+              <Inbox size={28} className="opacity-50" />
             </div>
-          ) : (
-            filteredList.map((sms: any, idx: number) => (
-              <OTPCard key={sms.receivedAt || idx} sms={sms} highlight={false} />
-            ))
-          )}
-        </div>
-      )}
+            <p>History is empty.</p>
+          </motion.div>
+        ) : (
+          <AnimatePresence>
+            {filteredMessages.map((msg: any, index: number) => (
+              <motion.div
+                key={msg.id || index}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: Math.min(index * 0.05, 0.5) }}
+              >
+                <OTPCard sms={msg} />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        )}
+      </div>
     </div>
   );
 };

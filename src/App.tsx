@@ -102,16 +102,26 @@ export default function App() {
   };
 
   return (
-    <>
-      <main className="app-content-scroll bg-[#000000]">
-        {renderTab()}
+    <div className="mesh-bg text-white h-[100dvh] w-full flex flex-col font-sans antialiased overflow-hidden relative">
+      {/* Background ambient lighting effects */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-blue-500/10 blur-[100px] pointer-events-none" />
+      <div className="absolute bottom-[20%] right-[-10%] w-[40%] h-[40%] rounded-full bg-purple-500/10 blur-[100px] pointer-events-none" />
+
+      {/* Main scrolling content area */}
+      <main className="app-content-scroll z-10">
+        <div className="max-w-xl mx-auto">
+          {renderTab()}
+        </div>
       </main>
       
-      <BottomNav 
-        activeTab={activeTab} 
-        setActiveTab={setActiveTab} 
-        isAdmin={!!userData?.isAdmin} 
-      />
-    </>
+      {/* Floating Bottom Navigation */}
+      <div className="z-50 max-w-xl mx-auto w-full absolute bottom-0 left-1/2 -translate-x-1/2">
+        <BottomNav 
+          activeTab={activeTab} 
+          setActiveTab={setActiveTab} 
+          isAdmin={!!userData?.isAdmin} 
+        />
+      </div>
+    </div>
   );
 }

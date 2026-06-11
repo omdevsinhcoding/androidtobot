@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@source "./";
+@source "../src";
 
 @layer base {
   :root {
@@ -24,7 +26,7 @@
     height: 100vh; /* Strict full height */
     height: 100dvh; /* Dynamic viewport height for modern mobile browsers */
     overflow: hidden; /* Lock native scrolling completely */
-    background-color: var(--tg-theme-bg-color);
+    background-color: #020617; /* Slate 950 base */
     color: var(--tg-theme-text-color);
     font-family: 'Satoshi', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     overscroll-behavior: none; /* Prevent iOS bounce */
@@ -47,28 +49,45 @@
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch; /* Smooth scroll on iOS */
     padding-top: calc(16px + var(--safe-top));
-    padding-bottom: calc(90px + var(--safe-bottom)); /* Generous space for bottom nav */
+    padding-bottom: calc(110px + var(--safe-bottom)); /* Generous space for bottom nav */
     padding-left: calc(16px + var(--safe-left));
     padding-right: calc(16px + var(--safe-right));
   }
 
-  /* Premium Glassmorphism */
+  /* Premium Mesh Background */
+  .mesh-bg {
+    background-color: #0f172a;
+    background-image: 
+      radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+      radial-gradient(at 50% 0%, hsla(225,39%,30%,0.2) 0, transparent 50%), 
+      radial-gradient(at 100% 0%, hsla(339,49%,30%,0.1) 0, transparent 50%);
+    background-attachment: fixed;
+  }
+
+  /* True Glassmorphism Panel */
   .glass-panel {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    box-shadow: 0 4px 24px -4px rgba(0,0,0,0.5);
-  }
-
-  /* Premium Card (No blur, solid dark background) */
-  .card-panel {
-    background: #121212;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
     border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
   }
 
-  .neon-text {
-    text-shadow: 0 0 10px rgba(42, 171, 238, 0.5);
+  /* Glowing accents */
+  .glow-border {
+    border: 1px solid rgba(42, 171, 238, 0.4);
+    box-shadow: 0 0 15px rgba(42, 171, 238, 0.15), inset 0 0 10px rgba(42, 171, 238, 0.05);
+  }
+
+  .glow-text {
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3), 0 0 20px var(--tg-theme-button-color);
+  }
+
+  /* Premium Solid Card */
+  .card-panel {
+    background: linear-gradient(145deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.9));
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
   }
 
   /* Hide scrollbar for clean UI */
